@@ -51,7 +51,7 @@ public class UsersDao extends AbstractDAO<User> implements BasicDao<User, Long> 
                 .setLastName("Last Name")
                 .setEmail("Email@mail.com")
                 .createPerson())
-                .limit(100)
+                .limit(5)
                 .collect(Collectors.toList());
         userDB.add(user1);
         userDB.add(user2);
