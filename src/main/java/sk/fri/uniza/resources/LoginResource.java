@@ -70,10 +70,10 @@ public class LoginResource {
 
                     switch (oauthRequest.getResponseType()) {
                         case "code":
-                            return new LoginPageViewBuilder().setRootPath("../../").setSessionId(sessionId).setAction("/api/login/code").createLoginPageView();
+                            return new LoginPageViewBuilder().setRootPath("../../").setSessionId(sessionId).setAction("/backend/login/code").createLoginPageView();
 
                         case "token":
-                            return new LoginPageViewBuilder().setRootPath("../../").setSessionId(sessionId).setAction("/api/login/implicit").createLoginPageView();
+                            return new LoginPageViewBuilder().setRootPath("../../").setSessionId(sessionId).setAction("/backend/login/implicit").createLoginPageView();
 
                         default:
                             throw new WebApplicationException("Auth2 bad response type. Support only \"code\" or \"token\"", Response.Status.BAD_REQUEST);

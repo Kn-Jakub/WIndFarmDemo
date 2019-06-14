@@ -7,6 +7,7 @@ import javax.persistence.Id;
 @Entity
 public class Phone {
 
+    private Long id;
     private Person owner;
     private String number;
 
@@ -26,8 +27,6 @@ public class Phone {
     public void setOwner(Person owner) {
         this.owner = owner;
     }
-
-    private Long id;
 
     @Id
     @GeneratedValue

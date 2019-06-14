@@ -32,7 +32,7 @@ viewRendererConfiguration:
 
 #Server configuration.
 server:
-  rootPath: /api/
+  rootPath: /backend/
   applicationConnectors:
     - type: http
       port: 8085
@@ -63,7 +63,7 @@ database:
   properties:
     charSet: UTF-8
     hibernate.dialect: org.hibernate.dialect.MariaDBDialect
-    hibernate.hbm2ddl.auto: create
+    hibernate.hbm2ddl.auto: update
     hibernate.show_sql: true
 
   # the maximum amount of time to wait on an empty pool before throwing an exception

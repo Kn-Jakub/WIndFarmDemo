@@ -35,8 +35,7 @@ public class PersonDao extends AbstractDAO<Person> implements BasicDao<Person, L
         CriteriaQuery<Person> criteriaQuery = builder.createQuery(Person.class);
         Root<Person> root = criteriaQuery.from(Person.class);
         criteriaQuery.select(root);
-        List<Person> list = list(criteriaQuery);
-        return list;
+        return list(criteriaQuery);
     }
 
     @Override

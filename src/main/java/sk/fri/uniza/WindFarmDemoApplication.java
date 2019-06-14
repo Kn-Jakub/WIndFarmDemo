@@ -139,7 +139,7 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         ));
 
         // Generate fake users
-        oAuth2Authenticator.generateUsers();
+        //oAuth2Authenticator.generateUsers();
 
         // Enable the resource protection annotations: @RolesAllowed, @PermitAll & @DenyAll
         environment.jersey().register(RolesAllowedDynamicFeature.class);

@@ -18,6 +18,8 @@ public class Person extends User {
     private String LastName;
     @NotEmpty
     private String email;
+    @OneToMany(mappedBy = "owner",fetch = FetchType.EAGER)
+    private Set<Phone> phoneNumbers;
 
     public Person(Person other) {
         super(other);
@@ -62,9 +64,6 @@ public class Person extends User {
         this.email = email;
     }
 
-
-    @OneToMany(mappedBy = "owner",fetch = FetchType.EAGER)
-    private Set<Phone> phoneNumbers;
 
     public Set<Phone> getPhoneNumbers() {
         return phoneNumbers;
