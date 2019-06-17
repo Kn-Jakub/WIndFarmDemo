@@ -28,10 +28,7 @@ import sk.fri.uniza.core.User;
 import sk.fri.uniza.db.PersonDao;
 import sk.fri.uniza.db.UsersDao;
 import sk.fri.uniza.health.TemplateHealthCheck;
-import sk.fri.uniza.resources.HelloWorldResource;
-import sk.fri.uniza.resources.LoginResource;
-import sk.fri.uniza.resources.PersonResource;
-import sk.fri.uniza.resources.UsersResource;
+import sk.fri.uniza.resources.*;
 import sk.fri.uniza.views.ErrorView;
 
 import javax.ws.rs.core.MediaType;
@@ -159,11 +156,13 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         final LoginResource loginResource = new LoginResource(secreteKey, usersDao, OAuth2Clients.getInstance());
         final UsersResource usersResource = new UsersResource(usersDao);
         final PersonResource personResource = new PersonResource(personDao);
+        final WeatherDataResource weatherResource = new WeatherDataResource();
 
         environment.jersey().register(helloWorldResource);
         environment.jersey().register(loginResource);
         environment.jersey().register(usersResource);
         environment.jersey().register(personResource);
+        environment.jersey().register(weatherResource);
     }
 
 }
