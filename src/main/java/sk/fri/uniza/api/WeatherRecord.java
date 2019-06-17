@@ -4,8 +4,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import javax.persistence.*;
 import java.sql.Timestamp;
 
+@Entity
+@Table(name = "Weather")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "id",
@@ -16,16 +19,28 @@ import java.sql.Timestamp;
         "creationTimeStamp"
 })
 public class WeatherRecord {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("id")
     private Long id;
+
+    @Column
     @JsonProperty("cityId")
     private Integer cityId;
+
+    @Column
     @JsonProperty("temperature")
     private double temperature;
+
+    @Column
     @JsonProperty("pressure")
     private double pressure;
+
+    @Column
     @JsonProperty("humidity")
     private double humidity;
+
+    @Column
     @JsonProperty("creationTimeStamp")
     private Timestamp creationTime;
 

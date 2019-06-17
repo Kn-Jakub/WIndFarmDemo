@@ -3,10 +3,9 @@ package sk.fri.uniza.api;
 import org.hibernate.validator.constraints.NotEmpty;
 import sk.fri.uniza.core.User;
 
-import javax.persistence.DiscriminatorValue;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -14,12 +13,24 @@ import java.util.Set;
 public class Person extends User {
     @NotEmpty
     private String FirstName;
+
     @NotEmpty
     private String LastName;
+
     @NotEmpty
     private String email;
+
     @OneToMany(mappedBy = "owner",fetch = FetchType.EAGER)
     private Set<Phone> phoneNumbers;
+
+    @ManyToMany
+    @JoinTable(
+            name = "Person_City",
+            joinColumns = { @JoinColumn(name = "person_id") },
+            inverseJoinColumns = { @JoinColumn(name = "city_id") }
+    )
+    private List<City> followedCities;
+
 
     public Person(Person other) {
         super(other);
@@ -71,6 +82,24 @@ public class Person extends User {
 
     public void setPhoneNumbers(Set<Phone> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
+    }
+
+    public List<City> getFollowedCities() {
+        return followedCities;
+    }
+
+    public Paged<List<City>> getFollowedCities(int limit, int page) {
+        ArrayList<City> pagedList = new ArrayList<>();
+
+        for(int i = (page - 1) * limit; i < (page * limit); i++){
+            pagedList.add(followedCities.get(i));
+        }
+
+        return new Paged<>(page, limit, pagedList.size(), pagedList);
+    }
+
+    public void setFollowedCities(List<City> followedCities) {
+        this.followedCities = followedCities;
     }
 
     @Override

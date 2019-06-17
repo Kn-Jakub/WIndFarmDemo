@@ -8,12 +8,14 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sk.fri.uniza.api.City;
 import sk.fri.uniza.api.Paged;
 import sk.fri.uniza.api.Person;
 import sk.fri.uniza.auth.Role;
 import sk.fri.uniza.core.User;
 import sk.fri.uniza.db.PersonDao;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -104,6 +106,30 @@ public class PersonResource {
             throw new WebApplicationException("Wrong person ID!", Response.Status.BAD_REQUEST);
         });
 
+    }
+
+    @GET
+    @Path("/{id}/cities")
+    @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
+    @PermitAll
+    public Response getListOfPersonsCities(@Auth User user, @PathParam("id") Long id, @QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
+        if (!user.getRoles().contains(Role.ADMIN)) {            // if user is not admin
+            if (user.getId() != id) {                           // if user not wand his own data
+                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+            }
+        }
+
+        Optional<Person> personOptional = personDao.findById(id);
+        Person person = personOptional.orElseThrow(() -> {
+            throw new WebApplicationException("Wrong person ID!", Response.Status.BAD_REQUEST);
+        });
+
+        Paged<List<City>> cityList = person.getFollowedCities(limit, page);
+
+        return Response.ok()
+                .entity(cityList)
+                .build();
     }
 
     @POST

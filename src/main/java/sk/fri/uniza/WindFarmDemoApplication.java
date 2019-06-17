@@ -18,15 +18,19 @@ import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.hibernate.SessionFactory;
+import sk.fri.uniza.api.City;
 import sk.fri.uniza.api.Person;
 import sk.fri.uniza.api.Phone;
+import sk.fri.uniza.api.WeatherRecord;
 import sk.fri.uniza.auth.OAuth2Authenticator;
 import sk.fri.uniza.auth.OAuth2Authorizer;
 import sk.fri.uniza.auth.OAuth2Clients;
 import sk.fri.uniza.config.WindFarmDemoConfiguration;
 import sk.fri.uniza.core.User;
+import sk.fri.uniza.db.CitiesDao;
 import sk.fri.uniza.db.PersonDao;
 import sk.fri.uniza.db.UsersDao;
+import sk.fri.uniza.db.WeatherRecordDao;
 import sk.fri.uniza.health.TemplateHealthCheck;
 import sk.fri.uniza.resources.*;
 import sk.fri.uniza.views.ErrorView;
@@ -47,12 +51,17 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         return "WindFarmDemo";
     }
 
-
     /**
      * Initialization of Hibernate ORM bundle.
      * Note: Add class that need to be mapped by Hibernate
      */
-    private final HibernateBundle<WindFarmDemoConfiguration> hibernate = new HibernateBundle<WindFarmDemoConfiguration>(User.class, Person.class, Phone.class) {
+    private final HibernateBundle<WindFarmDemoConfiguration> hibernate =
+            new HibernateBundle<WindFarmDemoConfiguration>(
+                    User.class,
+                    Person.class,
+                    Phone.class,
+                    WeatherRecord.class,
+                    City.class) {
 
         @Override
         public PooledDataSourceFactory getDataSourceFactory(WindFarmDemoConfiguration windFarmDemoConfiguration) {
@@ -146,23 +155,26 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
 
     private void registerResources(WindFarmDemoConfiguration configuration, Environment environment) {
 
-        final HelloWorldResource helloWorldResource = new HelloWorldResource(configuration.getTemplate(), configuration.getDefaultName());
-
         // Create Dao access objects
         final UsersDao usersDao = UsersDao.createUsersDao(hibernate.getSessionFactory());
         final PersonDao personDao = new PersonDao(hibernate.getSessionFactory());
+        final WeatherRecordDao weatherRecordDao = new WeatherRecordDao(hibernate.getSessionFactory());
+        final CitiesDao citiesDao = new CitiesDao(hibernate.getSessionFactory());
 
         KeyPair secreteKey = configuration.getOAuth2Configuration().getSecreteKey(false);
+        final HelloWorldResource helloWorldResource = new HelloWorldResource(configuration.getTemplate(), configuration.getDefaultName());
         final LoginResource loginResource = new LoginResource(secreteKey, usersDao, OAuth2Clients.getInstance());
         final UsersResource usersResource = new UsersResource(usersDao);
         final PersonResource personResource = new PersonResource(personDao);
-        final WeatherDataResource weatherResource = new WeatherDataResource();
+        final WeatherDataResource weatherResource = new WeatherDataResource(weatherRecordDao);
+        final CitiesResource citiesResource = new CitiesResource(citiesDao);
 
         environment.jersey().register(helloWorldResource);
         environment.jersey().register(loginResource);
         environment.jersey().register(usersResource);
         environment.jersey().register(personResource);
         environment.jersey().register(weatherResource);
+        environment.jersey().register(citiesResource);
     }
 
 }

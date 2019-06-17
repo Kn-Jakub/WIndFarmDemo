@@ -24,6 +24,8 @@
     <mapping class="sk.fri.uniza.api.Person"/>
     <mapping class="sk.fri.uniza.api.Phone"/>
     <mapping class="sk.fri.uniza.core.User"/>
+    <mapping class="sk.fri.uniza.api.WeatherRecord"/>
+    <mapping class="sk.fri.uniza.api.City"/>
 
   </session-factory>
 </hibernate-configuration>

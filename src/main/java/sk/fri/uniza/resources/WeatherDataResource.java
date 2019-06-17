@@ -1,7 +1,9 @@
 package sk.fri.uniza.resources;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import sk.fri.uniza.api.WeatherRecord;
 import sk.fri.uniza.api.WeatherRecordList;
+import sk.fri.uniza.db.WeatherRecordDao;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -16,11 +18,17 @@ import java.util.logging.Logger;
 public class WeatherDataResource {
     private final static java.util.logging.Logger LOGGER = Logger.getLogger(WeatherDataResource.class.getName());
 
+    private WeatherRecordDao database;
+
+    public WeatherDataResource(WeatherRecordDao database) {
+        this.database = database;
+    }
 
     @POST
     @Path("/recordList")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @UnitOfWork
     public Response storeWeatherRecordList(WeatherRecordList recordList){
         if (recordList.getCnt() > 0){
             for (WeatherRecord record : recordList.getList()){
@@ -30,6 +38,7 @@ public class WeatherDataResource {
                         + ", humidity=" + record.getHumidity()
                         + ", time=" + record.getCreationTime()
                 );
+                database.save(record);              // save record to the database
             }
             return Response.ok().build();
         }
