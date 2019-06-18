@@ -18,6 +18,8 @@ import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.hibernate.SessionFactory;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 import sk.fri.uniza.api.City;
 import sk.fri.uniza.api.Person;
 import sk.fri.uniza.api.Phone;
@@ -25,6 +27,7 @@ import sk.fri.uniza.api.WeatherRecord;
 import sk.fri.uniza.auth.OAuth2Authenticator;
 import sk.fri.uniza.auth.OAuth2Authorizer;
 import sk.fri.uniza.auth.OAuth2Clients;
+import sk.fri.uniza.client.SensorsRequest;
 import sk.fri.uniza.config.WindFarmDemoConfiguration;
 import sk.fri.uniza.core.User;
 import sk.fri.uniza.db.CitiesDao;
@@ -154,6 +157,13 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
     }
 
     private void registerResources(WindFarmDemoConfiguration configuration, Environment environment) {
+        // create client for requesting
+        final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(configuration.getSensorApiURL())
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+
+        final SensorsRequest sensorsRequest = retrofit.create(SensorsRequest.class);
 
         // Create Dao access objects
         final UsersDao usersDao = UsersDao.createUsersDao(hibernate.getSessionFactory());
@@ -161,11 +171,12 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         final WeatherRecordDao weatherRecordDao = new WeatherRecordDao(hibernate.getSessionFactory());
         final CitiesDao citiesDao = new CitiesDao(hibernate.getSessionFactory());
 
-        KeyPair secreteKey = configuration.getOAuth2Configuration().getSecreteKey(false);
+        final KeyPair secreteKey = configuration.getOAuth2Configuration().getSecreteKey(false);
+
         final HelloWorldResource helloWorldResource = new HelloWorldResource(configuration.getTemplate(), configuration.getDefaultName());
         final LoginResource loginResource = new LoginResource(secreteKey, usersDao, OAuth2Clients.getInstance());
         final UsersResource usersResource = new UsersResource(usersDao);
-        final PersonResource personResource = new PersonResource(personDao, citiesDao);
+        final PersonResource personResource = new PersonResource(personDao, citiesDao, sensorsRequest);
         final WeatherDataResource weatherResource = new WeatherDataResource(weatherRecordDao);
         final CitiesResource citiesResource = new CitiesResource(citiesDao);
 

@@ -1,6 +1,8 @@
 template: Hello, %s!
 defaultName: Stranger
 
+sensorApiURL: http://localhost:8090
+
 #OAUTH2 settings
 oauth2:
   keyAlias: myrsakey

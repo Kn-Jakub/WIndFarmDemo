@@ -26,6 +26,8 @@ public class WindFarmDemoConfiguration extends Configuration {
     private String template;
     @NotEmpty
     private String defaultName = "Stranger";
+    @NotEmpty
+    private String sensorApiURL;
 
     @JsonProperty("swagger")
     public SwaggerBundleConfiguration getSwaggerBundleConfiguration() {
@@ -85,5 +87,14 @@ public class WindFarmDemoConfiguration extends Configuration {
     @JsonProperty("viewRendererConfiguration")
     public void setViewRendererConfiguration(Map<String, Map<String, String>> viewRendererConfiguration) {
         this.viewRendererConfiguration = viewRendererConfiguration;
+    }
+
+    @JsonProperty("sensorApiURL")
+    public String getSensorApiURL() {
+        return sensorApiURL;
+    }
+    @JsonProperty("sensorApiURL")
+    public void setSensorApiURL(String sensorApiURL) {
+        this.sensorApiURL = sensorApiURL;
     }
 }

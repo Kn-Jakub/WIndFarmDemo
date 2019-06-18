@@ -8,10 +8,13 @@ import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import retrofit2.Call;
+import retrofit2.Callback;
 import sk.fri.uniza.api.City;
 import sk.fri.uniza.api.Paged;
 import sk.fri.uniza.api.Person;
 import sk.fri.uniza.auth.Role;
+import sk.fri.uniza.client.SensorsRequest;
 import sk.fri.uniza.core.User;
 import sk.fri.uniza.db.CitiesDao;
 import sk.fri.uniza.db.PersonDao;
@@ -22,9 +25,7 @@ import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @SwaggerDefinition(
         securityDefinition = @SecurityDefinition(
@@ -43,10 +44,12 @@ public class PersonResource {
     private final Logger myLogger = LoggerFactory.getLogger(this.getClass());
     private PersonDao personDao;
     private CitiesDao citiesDao;
+    private SensorsRequest sensorsRequest;
 
-    public PersonResource(PersonDao personDao, CitiesDao citiesDao) {
+    public PersonResource(PersonDao personDao, CitiesDao citiesDao, SensorsRequest sensorsRequest) {
         this.personDao = personDao;
         this.citiesDao = citiesDao;
+        this.sensorsRequest = sensorsRequest;
     }
 
     @GET
@@ -174,6 +177,7 @@ public class PersonResource {
 
     @POST
     @Path("/{id}/cities")
+    @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     @PermitAll
     public Response addPersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
@@ -188,13 +192,43 @@ public class PersonResource {
 
         person.addFollowedCity(city);
 
+        sentCitiesToSensorApi();
+
         return Response.ok().build();
     }
+
+
+    //for testing only
+//    @POST
+//    @Path("/{id}/cities")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @UnitOfWork
+//    public Response addPersonCity(@PathParam("id") Long id, @QueryParam("cityID") Long cityID){
+//
+//        Optional<Person> personOptional = personDao.findById(id);
+//
+//        Person person = personOptional.orElseThrow(() -> {
+//            throw new WebApplicationException("Wrong person ID!", Response.Status.BAD_REQUEST);
+//        });
+//
+//        Optional<City> cityOptional = citiesDao.findById(cityID);
+//
+//        City city = cityOptional.orElseThrow(() -> {
+//            throw new WebApplicationException("Wrong city ID!", Response.Status.BAD_REQUEST);
+//        });
+//
+//        person.addFollowedCity(city);
+//
+//        sentCitiesToSensorApi();
+//
+//        return Response.ok().build();
+//    }
 
 
     @DELETE
     @Path("/{id}/cities")
     @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
     @PermitAll
     public Response removePersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
 
@@ -207,6 +241,8 @@ public class PersonResource {
         });
 
         person.removeFollowedCity(city);
+
+        sentCitiesToSensorApi();
 
         return Response.ok().build();
     }
@@ -224,5 +260,42 @@ public class PersonResource {
         return personOptional.orElseThrow(() -> {
             throw new WebApplicationException("Wrong person ID!", Response.Status.BAD_REQUEST);
         });
+    }
+
+    private void sentCitiesToSensorApi(){
+        ArrayList<Person> persons = new ArrayList<>(personDao.getAll());
+        Set<Long> cityIDs = new HashSet<>();
+
+        for(Person person : persons){
+            List<City> personsCities = person.getFollowedCities();
+            for(City city : personsCities){
+                cityIDs.add(city.getId());
+            }
+        }
+
+        String IDs = cityIDs.toString()
+                .replace(" ", "")
+                .replace("[", "")
+                .replace("]", "");
+
+        Call<Void> request = sensorsRequest.setFollowedCities(IDs);
+
+        request.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(Call<Void> call, retrofit2.Response<Void> response) {
+                if (response.isSuccessful()){
+                    myLogger.info("IDs successfully sent to sensors");
+                } else {
+                    myLogger.info("IDs not sent to sensors. FAILED");
+                }
+
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable throwable) {
+                myLogger.info("failed to sent IDs to sensors");
+            }
+        });
+
     }
 }
