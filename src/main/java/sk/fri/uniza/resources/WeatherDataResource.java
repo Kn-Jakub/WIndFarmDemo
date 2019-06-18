@@ -43,12 +43,16 @@ public class WeatherDataResource {
         return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
+    /**
+     * Resource for get weather records for specified city.
+     * @param cityID ID of the city which comments
+     * @return
+     */
     @GET
     @Path("/recordList")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    public WeatherRecordList storeWeatherRecordList(@QueryParam("cityID") Long cityID){
-        List<WeatherRecord> allCityRecords = weatherRecordDao.getAllCityRecords(cityID);
-        return new WeatherRecordList(allCityRecords.size(), allCityRecords);
+    public List<WeatherRecord> storeWeatherRecordList(@QueryParam("cityID") Long cityID){
+        return weatherRecordDao.getAllCityRecords(cityID);
     }
 }
