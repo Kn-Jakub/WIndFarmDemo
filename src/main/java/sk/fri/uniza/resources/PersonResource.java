@@ -175,6 +175,7 @@ public class PersonResource {
     @POST
     @Path("/{id}/cities")
     @UnitOfWork
+    @PermitAll
     public Response addPersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
 
         Person person = checkPermissionsAndGetPerson(user, id);
@@ -194,6 +195,7 @@ public class PersonResource {
     @DELETE
     @Path("/{id}/cities")
     @UnitOfWork
+    @PermitAll
     public Response removePersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
 
         Person person = checkPermissionsAndGetPerson(user, id);
