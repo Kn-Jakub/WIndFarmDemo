@@ -194,7 +194,9 @@ public class PersonResource {
 
         sentCitiesToSensorApi();
 
-        return Response.ok().build();
+        return Response.ok()
+                .entity(person.getFollowedCities())
+                .build();
     }
 
 
@@ -247,6 +249,28 @@ public class PersonResource {
         return Response.ok().build();
     }
 
+    @GET
+    @Path("/cities")
+    @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
+    public Set<Long> getPersonalCities() {
+        return getAllPersonalCitiesIDs();
+    }
+
+    private Set<Long> getAllPersonalCitiesIDs() {
+        ArrayList<Person> persons = new ArrayList<>(personDao.getAll());
+        Set<Long> cityIDs = new HashSet<>();
+
+        for(Person person : persons){
+            List<City> personsCities = person.getFollowedCities();
+            for(City city : personsCities){
+                cityIDs.add(city.getId());
+            }
+        }
+
+        return cityIDs;
+    }
+
 
     private Person checkPermissionsAndGetPerson(User user, Long id){
         if (!user.getRoles().contains(Role.ADMIN)) {            // if user is not admin
@@ -263,15 +287,7 @@ public class PersonResource {
     }
 
     private void sentCitiesToSensorApi(){
-        ArrayList<Person> persons = new ArrayList<>(personDao.getAll());
-        Set<Long> cityIDs = new HashSet<>();
-
-        for(Person person : persons){
-            List<City> personsCities = person.getFollowedCities();
-            for(City city : personsCities){
-                cityIDs.add(city.getId());
-            }
-        }
+        Set<Long> cityIDs = getAllPersonalCitiesIDs();
 
         String IDs = cityIDs.toString()
                 .replace(" ", "")
