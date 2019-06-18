@@ -5,6 +5,7 @@ import sk.fri.uniza.api.WeatherRecord;
 import sk.fri.uniza.api.WeatherRecordList;
 import sk.fri.uniza.db.WeatherRecordDao;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,6 +53,7 @@ public class WeatherDataResource {
     @Path("/recordList")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
+    @PermitAll
     public List<WeatherRecord> storeWeatherRecordList(@QueryParam("cityID") Long cityID){
         return weatherRecordDao.getAllCityRecords(cityID);
     }
