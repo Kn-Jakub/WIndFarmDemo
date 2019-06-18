@@ -5,12 +5,10 @@ import sk.fri.uniza.api.WeatherRecord;
 import sk.fri.uniza.api.WeatherRecordList;
 import sk.fri.uniza.db.WeatherRecordDao;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -18,10 +16,10 @@ import java.util.logging.Logger;
 public class WeatherDataResource {
     private final static java.util.logging.Logger LOGGER = Logger.getLogger(WeatherDataResource.class.getName());
 
-    private WeatherRecordDao database;
+    private WeatherRecordDao weatherRecordDao;
 
-    public WeatherDataResource(WeatherRecordDao database) {
-        this.database = database;
+    public WeatherDataResource(WeatherRecordDao weatherRecordDao) {
+        this.weatherRecordDao = weatherRecordDao;
     }
 
     @POST
@@ -38,10 +36,19 @@ public class WeatherDataResource {
                         + ", humidity=" + record.getHumidity()
                         + ", time=" + record.getCreationTime()
                 );
-                database.save(record);              // save record to the database
+                weatherRecordDao.save(record);              // save record to the weatherRecordDao
             }
             return Response.ok().build();
         }
         return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+    @GET
+    @Path("/recordList")
+    @Produces(MediaType.APPLICATION_JSON)
+    @UnitOfWork
+    public WeatherRecordList storeWeatherRecordList(@QueryParam("cityID") Long cityID){
+        List<WeatherRecord> allCityRecords = weatherRecordDao.getAllCityRecords(cityID);
+        return new WeatherRecordList(allCityRecords.size(), allCityRecords);
     }
 }

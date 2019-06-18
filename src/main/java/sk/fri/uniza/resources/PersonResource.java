@@ -167,11 +167,16 @@ public class PersonResource {
     public Response getListOfPersonsCities(@Auth User user, @PathParam("id") Long id, @QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
         Person person = checkPermissionsAndGetPerson(user, id);
 
-        Paged<List<City>> cityList = person.getFollowedCities(limit, page);
-
-        return Response.ok()
-                .entity(cityList)
-                .build();
+        if (page == null) page = 1;
+        if (limit != null) {
+            return Response.ok()
+                    .entity(person.getFollowedCities(limit, page))
+                    .build();
+        } else {
+            return Response.ok()
+                    .entity(person.getFollowedCities())
+                    .build();
+        }
     }
 
 

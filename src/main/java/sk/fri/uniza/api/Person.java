@@ -91,8 +91,16 @@ public class Person extends User {
 
     public Paged<List<City>> getFollowedCities(int limit, int page) {
         ArrayList<City> pagedList = new ArrayList<>();
+        int firstIndex = (page - 1) * limit;
+        int lastIndex = page * limit - 1;
 
-        for(int i = (page - 1) * limit; i < (page * limit); i++){
+        if(followedCities.size() < firstIndex){ return null; }
+
+        if(followedCities.size() <= lastIndex){
+            lastIndex = followedCities.size() - 1;
+        }
+
+        for(int i = firstIndex; i <= lastIndex; i++){
             pagedList.add(followedCities.get(i));
         }
 
