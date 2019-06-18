@@ -8,10 +8,17 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import java.util.List;
+import java.util.Optional;
 
 public class CitiesDao extends AbstractDAO<City> {
     public CitiesDao(SessionFactory sessionFactory) {
         super(sessionFactory);
+    }
+
+
+    public Optional<City> findById(Long id) {
+        if (id == null) return Optional.empty();
+        return Optional.ofNullable(get(id));
     }
 
 

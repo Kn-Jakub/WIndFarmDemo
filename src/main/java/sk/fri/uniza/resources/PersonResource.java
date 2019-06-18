@@ -13,6 +13,7 @@ import sk.fri.uniza.api.Paged;
 import sk.fri.uniza.api.Person;
 import sk.fri.uniza.auth.Role;
 import sk.fri.uniza.core.User;
+import sk.fri.uniza.db.CitiesDao;
 import sk.fri.uniza.db.PersonDao;
 
 import javax.annotation.security.PermitAll;
@@ -22,6 +23,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @SwaggerDefinition(
@@ -40,9 +42,11 @@ import java.util.Optional;
 public class PersonResource {
     private final Logger myLogger = LoggerFactory.getLogger(this.getClass());
     private PersonDao personDao;
+    private CitiesDao citiesDao;
 
-    public PersonResource(PersonDao personDao) {
+    public PersonResource(PersonDao personDao, CitiesDao citiesDao) {
         this.personDao = personDao;
+        this.citiesDao = citiesDao;
     }
 
     @GET
@@ -108,30 +112,6 @@ public class PersonResource {
 
     }
 
-    @GET
-    @Path("/{id}/cities")
-    @UnitOfWork
-    @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
-    public Response getListOfPersonsCities(@Auth User user, @PathParam("id") Long id, @QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
-        if (!user.getRoles().contains(Role.ADMIN)) {            // if user is not admin
-            if (user.getId() != id) {                           // if user not wand his own data
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-            }
-        }
-
-        Optional<Person> personOptional = personDao.findById(id);
-        Person person = personOptional.orElseThrow(() -> {
-            throw new WebApplicationException("Wrong person ID!", Response.Status.BAD_REQUEST);
-        });
-
-        Paged<List<City>> cityList = person.getFollowedCities(limit, page);
-
-        return Response.ok()
-                .entity(cityList)
-                .build();
-    }
-
     @POST
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
@@ -176,4 +156,71 @@ public class PersonResource {
 
     }
 
+    @GET
+    @Path("/{id}/cities")
+    @UnitOfWork
+    @Produces(MediaType.APPLICATION_JSON)
+    @PermitAll
+    public Response getListOfPersonsCities(@Auth User user, @PathParam("id") Long id, @QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
+        Person person = checkPermissionsAndGetPerson(user, id);
+
+        Paged<List<City>> cityList = person.getFollowedCities(limit, page);
+
+        return Response.ok()
+                .entity(cityList)
+                .build();
+    }
+
+
+    @POST
+    @Path("/{id}/cities")
+    @UnitOfWork
+    public Response addPersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
+
+        Person person = checkPermissionsAndGetPerson(user, id);
+
+        Optional<City> cityOptional = citiesDao.findById(cityID);
+
+        City city = cityOptional.orElseThrow(() -> {
+            throw new WebApplicationException("Wrong city ID!", Response.Status.BAD_REQUEST);
+        });
+
+        person.addFollowedCity(city);
+
+        return Response.ok().build();
+    }
+
+
+    @DELETE
+    @Path("/{id}/cities")
+    @UnitOfWork
+    public Response removePersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
+
+        Person person = checkPermissionsAndGetPerson(user, id);
+
+        Optional<City> cityOptional = citiesDao.findById(cityID);
+
+        City city = cityOptional.orElseThrow(() -> {
+            throw new WebApplicationException("Wrong city ID!", Response.Status.BAD_REQUEST);
+        });
+
+        person.removeFollowedCity(city);
+
+        return Response.ok().build();
+    }
+
+
+    private Person checkPermissionsAndGetPerson(User user, Long id){
+        if (!user.getRoles().contains(Role.ADMIN)) {            // if user is not admin
+            if (!Objects.equals(user.getId(), id)) {                           // if user not want his own data
+                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+            }
+        }
+
+        Optional<Person> personOptional = personDao.findById(id);
+
+        return personOptional.orElseThrow(() -> {
+            throw new WebApplicationException("Wrong person ID!", Response.Status.BAD_REQUEST);
+        });
+    }
 }

@@ -1,6 +1,7 @@
 package sk.fri.uniza.api;
 
 import javax.annotation.Generated;
+import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SetAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
@@ -9,11 +10,13 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(Person.class)
 public abstract class Person_ extends sk.fri.uniza.core.User_ {
 
+	public static volatile ListAttribute<Person, City> followedCities;
 	public static volatile SingularAttribute<Person, String> FirstName;
 	public static volatile SingularAttribute<Person, String> LastName;
 	public static volatile SingularAttribute<Person, String> email;
 	public static volatile SetAttribute<Person, Phone> phoneNumbers;
 
+	public static final String FOLLOWED_CITIES = "followedCities";
 	public static final String FIRST_NAME = "FirstName";
 	public static final String LAST_NAME = "LastName";
 	public static final String EMAIL = "email";

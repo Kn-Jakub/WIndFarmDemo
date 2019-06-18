@@ -6,6 +6,7 @@ import sk.fri.uniza.core.User;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -102,6 +103,17 @@ public class Person extends User {
         this.followedCities = followedCities;
     }
 
+    public void addFollowedCity(City city){
+        if (!followedCities.contains(city)){
+            followedCities.add(city);
+        }
+    }
+
+    public void removeFollowedCity(City city) {
+        followedCities.remove(city);
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -113,7 +125,7 @@ public class Person extends User {
         if (!FirstName.equals(person.FirstName)) return false;
         if (!LastName.equals(person.LastName)) return false;
         if (!email.equals(person.email)) return false;
-        return phoneNumbers != null ? phoneNumbers.equals(person.phoneNumbers) : person.phoneNumbers == null;
+        return Objects.equals(phoneNumbers, person.phoneNumbers);
 
     }
 
@@ -126,4 +138,6 @@ public class Person extends User {
         result = 31 * result + (phoneNumbers != null ? phoneNumbers.hashCode() : 0);
         return result;
     }
+
+
 }

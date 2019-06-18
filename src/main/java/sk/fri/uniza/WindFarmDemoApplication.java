@@ -165,7 +165,7 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         final HelloWorldResource helloWorldResource = new HelloWorldResource(configuration.getTemplate(), configuration.getDefaultName());
         final LoginResource loginResource = new LoginResource(secreteKey, usersDao, OAuth2Clients.getInstance());
         final UsersResource usersResource = new UsersResource(usersDao);
-        final PersonResource personResource = new PersonResource(personDao);
+        final PersonResource personResource = new PersonResource(personDao, citiesDao);
         final WeatherDataResource weatherResource = new WeatherDataResource(weatherRecordDao);
         final CitiesResource citiesResource = new CitiesResource(citiesDao);
 
