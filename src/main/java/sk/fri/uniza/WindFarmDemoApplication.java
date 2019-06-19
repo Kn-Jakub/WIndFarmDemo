@@ -138,7 +138,10 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         final UsersDao usersDao = UsersDao.createUsersDao(hibernate.getSessionFactory());
 
         // Initialize OAuth 2 authorization mechanism
-        OAuth2Authenticator oAuth2Authenticator = new UnitOfWorkAwareProxyFactory(hibernate).create(OAuth2Authenticator.class, new Class[]{UsersDao.class, Key.class}, new Object[]{usersDao, secreteKey.getPublic()});
+        OAuth2Authenticator oAuth2Authenticator = new UnitOfWorkAwareProxyFactory(hibernate)
+                .create(OAuth2Authenticator.class,
+                        new Class[]{UsersDao.class, Key.class},
+                        new Object[]{usersDao, secreteKey.getPublic()});
         environment.jersey().register(new AuthDynamicFeature(
                 new OAuthCredentialAuthFilter.Builder<User>()
                         .setAuthenticator(oAuth2Authenticator)

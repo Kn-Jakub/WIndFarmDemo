@@ -199,9 +199,7 @@ public class PersonResource {
 
         sentCitiesToSensorApi();
 
-        return Response.ok()
-                .entity(person.getFollowedCities())
-                .build();
+        return Response.ok().build();
     }
 
 
