@@ -87,11 +87,11 @@ database:
 #https://github.com/smoketurner/dropwizard-swagger
 swagger:
   resourcePackage: sk.fri.uniza.resources
-  title: WindFarmDemo microservices
+  title: IoT Weather Backend Microservices
   schemes: ["http","https"]
-  uriPrefix: "/api"
+  uriPrefix: "/backend"
   oauth2:
     clientId: client1
     clientSecrete: 123456
-    appName: WindFarmDemo
+    appName: IoT Weather
     realm: JWT

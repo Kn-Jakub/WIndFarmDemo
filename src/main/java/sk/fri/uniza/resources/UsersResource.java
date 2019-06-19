@@ -1,6 +1,8 @@
 package sk.fri.uniza.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sk.fri.uniza.api.Paged;
@@ -15,6 +17,7 @@ import javax.ws.rs.core.Response;
 import java.util.List;
 
 @Path("/users")
+@Api(value = "Users")
 public class UsersResource {
     private final Logger myLogger = LoggerFactory.getLogger(this.getClass());
     private UsersDao usersDao;
@@ -27,6 +30,9 @@ public class UsersResource {
     @UnitOfWork
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gets list of all users",
+            response = User.class,
+            responseContainer = "Paged<List<>>")
     public Response getListOfUsers(@QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
         if (page == null) page = 1;
         if (limit != null) {
@@ -50,6 +56,7 @@ public class UsersResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed({Role.ADMIN})
+    @ApiOperation(value = "Sets new password to user")
     public Response setNewPassword(@QueryParam("id") Long id, @FormParam("password") String password) {
 
 //        Optional<User> userOptional = usersDao.findById(id);

@@ -1,6 +1,7 @@
 package sk.fri.uniza.api;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.persistence.*;
@@ -12,7 +13,7 @@ public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty
-    private Integer id;
+    private Long id;
 
     @Column
     @JsonProperty
@@ -45,11 +46,16 @@ public class City {
         this.coord_lat = cord_lat;
     }
 
-    public Integer getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    @JsonIgnore
+    public Integer getIdAsInteger() {
+        return id.intValue();
+    }
+
+    public void setId(Long id) {
         this.id = id;
     }
 

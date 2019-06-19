@@ -96,7 +96,7 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         // Add ORM Hibernate bundle
         bootstrap.addBundle(hibernate);
 
-        // Swagger documentation available on http://localhost:<your_port>/swagger
+        // Swagger documentation available on http://localhost:<your_port>/backend/swagger
         bootstrap.addBundle(new SwaggerBundle<WindFarmDemoConfiguration>() {
             @Override
             protected SwaggerBundleConfiguration getSwaggerBundleConfiguration(WindFarmDemoConfiguration configuration) {

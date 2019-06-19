@@ -1,6 +1,8 @@
 package sk.fri.uniza.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import sk.fri.uniza.api.City;
 import sk.fri.uniza.db.CitiesDao;
 
@@ -16,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Path("/cities")
+@Api(value = "Cities (sensors)")
 public class CitiesResource {
     private static final String ALL_COUNTRIES_STR = "all";
     private CitiesDao citiesDao;
@@ -33,6 +36,7 @@ public class CitiesResource {
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     @PermitAll
+    @ApiOperation(value = "Gets all cities from database that are from specified country. When there is no \"country\" in query param, it gets all cities.")
     public List<City> getCities(@QueryParam("country") Optional<String> country){
         final String countryStr = country.orElse(ALL_COUNTRIES_STR);
         ArrayList<City> cities = null;
@@ -49,6 +53,7 @@ public class CitiesResource {
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
     @PermitAll
+    @ApiOperation(value = "Gets all countries which cities are placed in database.")
     public List<String> getAllCountries(){
         if(countries.size() == 0){
             readAllCountries();

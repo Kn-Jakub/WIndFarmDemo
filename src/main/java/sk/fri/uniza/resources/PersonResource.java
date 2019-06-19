@@ -21,7 +21,6 @@ import sk.fri.uniza.core.User;
 import sk.fri.uniza.db.CitiesDao;
 import sk.fri.uniza.db.PersonDao;
 
-import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -35,7 +34,7 @@ import java.util.*;
         )
 )
 
-@Api(value = "Person resource", authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources"), @AuthorizationScope(scope = Role.USER_READ_ONLY, description = "Limited access")})})
+@Api(value = "Persons", authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources"), @AuthorizationScope(scope = Role.USER_READ_ONLY, description = "Limited access")})})
 
 
 @ApiImplicitParams(
@@ -63,7 +62,12 @@ public class PersonResource {
     @RolesAllowed(Role.ADMIN)
 
     // Swagger
-    @ApiOperation(value = "Obtain list of users", response = Person.class, responseContainer = "List", authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources")})})
+    @ApiOperation(value = "Obtain list of users",
+            response = Person.class,
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources")})})
     public Response getListOfPersons(@QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
         if (page == null) page = 1;
         if (limit != null) {
@@ -84,7 +88,11 @@ public class PersonResource {
     @DELETE
     @UnitOfWork
     @RolesAllowed(Role.ADMIN)
-    @ApiOperation(value = "Delete person", response = Person.class, authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources")})})
+    @ApiOperation(value = "Delete person",
+            response = Person.class,
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources")})})
     public Response deletePerson(@ApiParam(hidden = true) @Auth User user, @QueryParam("id") Long id) {
         if (user.getId() != id) {
             Optional<Person> person1 = personDao.findById(id);
@@ -103,7 +111,13 @@ public class PersonResource {
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Role.ADMIN, Role.USER_READ_ONLY})
-    @ApiOperation(value = "Find person by ID", response = Person.class, authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources"), @AuthorizationScope(scope = Role.USER_READ_ONLY, description = "Limited access")})})
+    @ApiOperation(value = "Find person by ID",
+            response = Person.class,
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources"),
+                            @AuthorizationScope(scope = Role.USER_READ_ONLY,
+                                    description = "Limited access")})})
     public Person getPersonInfo(@ApiParam(hidden = true) @Auth User user, @PathParam("id") Long id) {
 
         if (!user.getRoles().contains(Role.ADMIN)) {
@@ -123,7 +137,12 @@ public class PersonResource {
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
     @RolesAllowed({Role.ADMIN, Role.USER_READ_ONLY})
-    @ApiOperation(value = "Save or update person", response = Person.class, authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources"), @AuthorizationScope(scope = Role.USER_READ_ONLY, description = "Limited access")})})
+    @ApiOperation(value = "Save or update person",
+            response = Person.class, authorizations = {@Authorization(value = "oauth2",
+            scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                    description = "Access to all resources"),
+                    @AuthorizationScope(scope = Role.USER_READ_ONLY,
+                            description = "Limited access")})})
     public Person setPersonInfo(@ApiParam(hidden = true) @Auth User user, @Valid Person person) {
 
         if (!user.getRoles().contains(Role.ADMIN)) {
@@ -151,7 +170,10 @@ public class PersonResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @RolesAllowed({Role.ADMIN})
-    @ApiOperation(value = "Set new password", authorizations = {@Authorization(value = "oauth2", scopes = {@AuthorizationScope(scope = Role.ADMIN, description = "Access to all resources")})})
+    @ApiOperation(value = "Set new password",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources")})})
     public Response setNewPassword(@QueryParam("id") Long id,
                                    @FormParam("password")
                                    @Length(min = 5)
@@ -167,8 +189,19 @@ public class PersonResource {
     @Path("/{id}/cities")
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
-    public Response getListOfPersonsCities(@Auth User user, @PathParam("id") Long id, @QueryParam("limit") Integer limit, @QueryParam("page") Integer page) {
+    @RolesAllowed({Role.ADMIN, Role.USER_READ_ONLY})
+    @ApiOperation(value = "Gets list of followed cities of specified person. When limit is filled, it returns paged list.",
+            response = City.class,
+            responseContainer = "List of Paged<List>",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources"),
+                            @AuthorizationScope(scope = Role.USER_READ_ONLY,
+                                    description = "Limited access")})})
+    public Response getListOfPersonsCities(@Auth User user,
+                                           @PathParam("id") Long id,
+                                           @QueryParam("limit") Integer limit,
+                                           @QueryParam("page") Integer page) {
         Person person = checkPermissionsAndGetPerson(user, id);
 
         if (page == null) page = 1;
@@ -188,7 +221,13 @@ public class PersonResource {
     @Path("/{id}/cities")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    @PermitAll
+    @RolesAllowed({Role.ADMIN, Role.USER_READ_ONLY})
+    @ApiOperation(value = "Posts City to specified user's followed cities.",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources"),
+                            @AuthorizationScope(scope = Role.USER_READ_ONLY,
+                                    description = "Limited access")})})
     public Response addPersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
 
         Person person = checkPermissionsAndGetPerson(user, id);
@@ -238,7 +277,13 @@ public class PersonResource {
     @Path("/{id}/cities")
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
-    @PermitAll
+    @RolesAllowed({Role.ADMIN, Role.USER_READ_ONLY})
+    @ApiOperation(value = "Deletes specified City from specified user's followed cities.",
+            authorizations = {@Authorization(value = "oauth2",
+                    scopes = {@AuthorizationScope(scope = Role.ADMIN,
+                            description = "Access to all resources"),
+                            @AuthorizationScope(scope = Role.USER_READ_ONLY,
+                                    description = "Limited access")})})
     public Response removePersonCity(@Auth User user, @PathParam("id") Long id, @QueryParam("cityID") Long cityID){
 
         Person person = checkPermissionsAndGetPerson(user, id);
@@ -260,6 +305,9 @@ public class PersonResource {
     @Path("/cities")
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gets all followed cities IDs.(from all persons)",
+            response = CityApiKey.class,
+            responseContainer = "List")
     public List<CityApiKey> getPersonalCities() {
         Set<Integer> cityIDs = getAllPersonalCitiesIDs();
 
@@ -277,7 +325,7 @@ public class PersonResource {
         for(Person person : persons){
             List<City> personsCities = person.getFollowedCities();
             for(City city : personsCities){
-                cityIDs.add(city.getId());
+                cityIDs.add(city.getIdAsInteger());
             }
         }
 

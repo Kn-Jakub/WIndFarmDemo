@@ -104,7 +104,7 @@ public class Person extends User {
             pagedList.add(followedCities.get(i));
         }
 
-        return new Paged<>(page, limit, pagedList.size(), pagedList);
+        return new Paged<>(page, limit, followedCities.size(), pagedList);
     }
 
     public void setFollowedCities(List<City> followedCities) {

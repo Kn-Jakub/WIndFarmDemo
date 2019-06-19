@@ -1,12 +1,15 @@
 package sk.fri.uniza.resources;
 
 import io.dropwizard.hibernate.UnitOfWork;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import sk.fri.uniza.api.CityApiKey;
 import sk.fri.uniza.api.WeatherRecord;
 import sk.fri.uniza.api.WeatherRecordList;
 import sk.fri.uniza.auth.CityAuthenticator;
 import sk.fri.uniza.db.WeatherRecordDao;
 
+import javax.annotation.security.PermitAll;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -16,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Path("/weather/data")
+@Api(value = "Weather")
 public class WeatherDataResource {
     private final static java.util.logging.Logger LOGGER = Logger.getLogger(WeatherDataResource.class.getName());
 
@@ -32,6 +36,7 @@ public class WeatherDataResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
+    @ApiOperation(value = "Stores list of weather records." )
     public Response storeWeatherRecordList(WeatherRecordList recordList){
         if (recordList.getCnt() > 0){
             for (WeatherRecord record : recordList.getList()){
@@ -53,6 +58,7 @@ public class WeatherDataResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
+    @ApiOperation(value = "Stores weather records." )
     public Response storeWeatherRecord(WeatherRecord record, @QueryParam("key") String key){
         Optional<CityApiKey> keyOptional = cityAuthenticator.authenticate(key);
 
@@ -90,7 +96,11 @@ public class WeatherDataResource {
     @Path("/recordList")
     @Produces(MediaType.APPLICATION_JSON)
     @UnitOfWork
-    //@PermitAll
+    @PermitAll
+    @ApiOperation(value = "Gets list of weather records related to specified city. If \"limit\" query is specified, " +
+            "it returns only limited number of records",
+            response = WeatherRecord.class,
+            responseContainer = "List")
     public List<WeatherRecord> getWeatherRecordList(@QueryParam("cityID") Long cityID, @QueryParam("limit") Integer limit){
         if(limit == null){
             return weatherRecordDao.getAllCityRecords(cityID);
