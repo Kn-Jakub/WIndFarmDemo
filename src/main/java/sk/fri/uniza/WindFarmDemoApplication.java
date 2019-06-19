@@ -24,6 +24,7 @@ import sk.fri.uniza.api.City;
 import sk.fri.uniza.api.Person;
 import sk.fri.uniza.api.Phone;
 import sk.fri.uniza.api.WeatherRecord;
+import sk.fri.uniza.auth.CityAuthenticator;
 import sk.fri.uniza.auth.OAuth2Authenticator;
 import sk.fri.uniza.auth.OAuth2Authorizer;
 import sk.fri.uniza.auth.OAuth2Clients;
@@ -168,6 +169,8 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
 
         final SensorsRequest sensorsRequest = retrofit.create(SensorsRequest.class);
 
+        final CityAuthenticator cityAuthenticator = new CityAuthenticator();
+
         // Create Dao access objects
         final UsersDao usersDao = UsersDao.createUsersDao(hibernate.getSessionFactory());
         final PersonDao personDao = new PersonDao(hibernate.getSessionFactory());
@@ -179,8 +182,8 @@ public class WindFarmDemoApplication extends Application<WindFarmDemoConfigurati
         final HelloWorldResource helloWorldResource = new HelloWorldResource(configuration.getTemplate(), configuration.getDefaultName());
         final LoginResource loginResource = new LoginResource(secreteKey, usersDao, OAuth2Clients.getInstance());
         final UsersResource usersResource = new UsersResource(usersDao);
-        final PersonResource personResource = new PersonResource(personDao, citiesDao, sensorsRequest);
-        final WeatherDataResource weatherResource = new WeatherDataResource(weatherRecordDao);
+        final PersonResource personResource = new PersonResource(personDao, citiesDao, sensorsRequest, cityAuthenticator);
+        final WeatherDataResource weatherResource = new WeatherDataResource(weatherRecordDao, cityAuthenticator);
         final CitiesResource citiesResource = new CitiesResource(citiesDao);
 
         environment.jersey().register(helloWorldResource);

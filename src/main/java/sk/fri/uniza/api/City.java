@@ -12,7 +12,7 @@ public class City {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty
-    private Long id;
+    private Integer id;
 
     @Column
     @JsonProperty
@@ -45,11 +45,11 @@ public class City {
         this.coord_lat = cord_lat;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

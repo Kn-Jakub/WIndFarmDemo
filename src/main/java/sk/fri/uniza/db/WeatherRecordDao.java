@@ -19,10 +19,24 @@ public class WeatherRecordDao extends AbstractDAO<WeatherRecord> {
     }
 
     public List<WeatherRecord> getAllCityRecords(Long cityID){
+
+        return list(getCriteriaQueryAllRecords(cityID));
+    }
+
+    public List<WeatherRecord> getAllCityRecords(Long cityID, int limit) {
+
+
+        return currentSession().createQuery(getCriteriaQueryAllRecords(cityID))
+                .setMaxResults(limit)
+                .list();
+    }
+
+    private CriteriaQuery<WeatherRecord> getCriteriaQueryAllRecords(Long cityID){
         CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         CriteriaQuery<WeatherRecord> criteriaQuery = builder.createQuery(WeatherRecord.class);
         Root<WeatherRecord> root = criteriaQuery.from(WeatherRecord.class);
         criteriaQuery.select(root).where(builder.equal(root.get("cityId"), cityID));       // condition to get only cities from specified country
-        return list(criteriaQuery);
+        criteriaQuery.orderBy(builder.desc(root.get("creationTime")));                       // order by creation time
+        return criteriaQuery;
     }
 }

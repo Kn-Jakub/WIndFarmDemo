@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import retrofit2.Call;
 import retrofit2.Callback;
 import sk.fri.uniza.api.City;
+import sk.fri.uniza.api.CityApiKey;
 import sk.fri.uniza.api.Paged;
 import sk.fri.uniza.api.Person;
+import sk.fri.uniza.auth.CityAuthenticator;
 import sk.fri.uniza.auth.Role;
 import sk.fri.uniza.client.SensorsRequest;
 import sk.fri.uniza.core.User;
@@ -45,11 +47,13 @@ public class PersonResource {
     private PersonDao personDao;
     private CitiesDao citiesDao;
     private SensorsRequest sensorsRequest;
+    private CityAuthenticator cityAuthenticator;
 
-    public PersonResource(PersonDao personDao, CitiesDao citiesDao, SensorsRequest sensorsRequest) {
+    public PersonResource(PersonDao personDao, CitiesDao citiesDao, SensorsRequest sensorsRequest, CityAuthenticator cityAuthenticator) {
         this.personDao = personDao;
         this.citiesDao = citiesDao;
         this.sensorsRequest = sensorsRequest;
+        this.cityAuthenticator = cityAuthenticator;
     }
 
     @GET
@@ -256,13 +260,19 @@ public class PersonResource {
     @Path("/cities")
     @UnitOfWork
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<Long> getPersonalCities() {
-        return getAllPersonalCitiesIDs();
+    public List<CityApiKey> getPersonalCities() {
+        Set<Integer> cityIDs = getAllPersonalCitiesIDs();
+
+        cityAuthenticator.unregisterAll();
+        for(Integer id : cityIDs){
+            cityAuthenticator.registerNewCity(id);
+        }
+        return cityAuthenticator.getAuthenticatedCities();
     }
 
-    private Set<Long> getAllPersonalCitiesIDs() {
+    private Set<Integer> getAllPersonalCitiesIDs() {
         ArrayList<Person> persons = new ArrayList<>(personDao.getAll());
-        Set<Long> cityIDs = new HashSet<>();
+        Set<Integer> cityIDs = new HashSet<>();
 
         for(Person person : persons){
             List<City> personsCities = person.getFollowedCities();
@@ -290,14 +300,19 @@ public class PersonResource {
     }
 
     private void sentCitiesToSensorApi(){
-        Set<Long> cityIDs = getAllPersonalCitiesIDs();
+        Set<Integer> cityIDs = getAllPersonalCitiesIDs();
 
-        String IDs = cityIDs.toString()
-                .replace(" ", "")
-                .replace("[", "")
-                .replace("]", "");
+//        String IDs = cityIDs.toString()
+//                .replace(" ", "")
+//                .replace("[", "")
+//                .replace("]", "");
 
-        Call<Void> request = sensorsRequest.setFollowedCities(IDs);
+        cityAuthenticator.unregisterAll();
+        for(Integer id : cityIDs){
+            cityAuthenticator.registerNewCity(id);
+        }
+
+        Call<Void> request = sensorsRequest.setFollowedCities(cityAuthenticator.getAuthenticatedCities());
 
         request.enqueue(new Callback<>() {
             @Override

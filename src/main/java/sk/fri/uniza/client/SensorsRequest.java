@@ -1,17 +1,19 @@
 package sk.fri.uniza.client;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.POST;
-import retrofit2.http.Query;
+import sk.fri.uniza.api.CityApiKey;
 
+import java.util.List;
 
 
 public interface SensorsRequest {
     /**
      * Request to set cities that will be followed.
      *
-     * @param IDs IDs of cities which about information is requested.
+     * @param cities City-Key pairs of followed cities
      */
     @POST("/settings/cities")
-    Call<Void> setFollowedCities(@Query("cityIDs") String IDs);
+    Call<Void> setFollowedCities(@Body List<CityApiKey> cities);
 }
